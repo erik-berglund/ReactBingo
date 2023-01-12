@@ -29,7 +29,7 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   buildSquaresMap(dimension: number): SquaresMap {
-    let returnMap: SquaresMap = new Map();
+    const returnMap: SquaresMap = new Map();
     let tmpArray: number[];
     
     let delta: number; // For storing the value minimum for a column
@@ -82,11 +82,11 @@ class App extends React.Component<AppProps, AppState> {
     }
    
     // Randomly pick one
-    let randomIndexWithinAvailableRange: number = Math.floor(Math.random() * available.length); // Exclusive
-    let randomSquare = available[randomIndexWithinAvailableRange];
+    const randomIndexWithinAvailableRange: number = Math.floor(Math.random() * available.length); // Exclusive
+    const randomSquare = available[randomIndexWithinAvailableRange];
     
     // Copy state
-    let tmpSquares: SquaresMap = new Map(this.state.squares);
+    const tmpSquares: SquaresMap = new Map(this.state.squares);
     
     // Mark random square drawn
     tmpSquares.set(randomSquare.value, {...randomSquare, drawn: true});
@@ -98,8 +98,8 @@ class App extends React.Component<AppProps, AppState> {
 
   checkForBingo(): void {
 
-    var accumulatorSquares: SquaresMap = new Map(this.state.squares);
-    var allSquaresArray = Array.from(this.state.squares.values());
+    let accumulatorSquares: SquaresMap = new Map(this.state.squares);
+    const allSquaresArray = Array.from(this.state.squares.values());
 
     // A memoized selector would be better, eg. reselect with a data
     // structure where rows, cols and diagonals are separated somehow.
