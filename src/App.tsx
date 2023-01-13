@@ -106,8 +106,8 @@ class App extends React.Component<AppProps, AppState> {
 
     // Check rows and columns
     for (let i = 0; i < this.props.dimension; i++) {
-      [ [...allSquaresArray].filter(squareData => (squareData.drawn && squareData.row == i)),
-        [...allSquaresArray].filter(squareData => (squareData.drawn && squareData.col == i))
+      [ allSquaresArray.filter(squareData => (squareData.drawn && squareData.row == i)),
+        allSquaresArray.filter(squareData => (squareData.drawn && squareData.col == i))
       ].forEach(squaresToCheck => {
         accumulatorSquares = this.checkAndUpdateBingoState(
           accumulatorSquares, squaresToCheck
@@ -117,8 +117,8 @@ class App extends React.Component<AppProps, AppState> {
 
     // For topLeft-bottomRight diagonal, row == col
     // For bottomLeft-topRight diagonal, row + col == dimension - 1
-    [ [...allSquaresArray].filter(squareData => (squareData.drawn && squareData.row == squareData.col)),
-      [...allSquaresArray].filter(squareData => (squareData.drawn && squareData.row + squareData.col == this.props.dimension - 1))
+    [ allSquaresArray.filter(squareData => (squareData.drawn && squareData.row == squareData.col)),
+      allSquaresArray.filter(squareData => (squareData.drawn && squareData.row + squareData.col == this.props.dimension - 1))
     ].forEach(squaresToCheck => {
       accumulatorSquares = this.checkAndUpdateBingoState(
         accumulatorSquares, squaresToCheck
