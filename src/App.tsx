@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { enableMapSet } from 'immer';
 import { useImmerReducer } from 'use-immer';
 import classNames from 'classnames';
-import './App.scss';
+import styles from './scss/App.module.scss';
 
 // Immer requires this for Map, Set
 enableMapSet();
@@ -166,27 +166,27 @@ const App = ({ dimension }: { dimension: number }) => {
   }
 
   return (
-    <div className="App">
+    <div className={styles.App}>
 
-      <div className="drawnNumbersContainer">
+      <div className={styles.drawnNumbersContainer}>
         { Array.from(drawHistory).map(square => (
           <span
             key={square}
             className={classNames({
-              "found": squares.has(square)
+              [styles.found]: squares.has(square)
             })}
-          >{square}</span>  
+          >{square}</span>
         ))}
       </div>
       
-      <div className="playerNameContainer">
+      <div className={styles.playerNameContainer}>
         { !playerName && <span>Your name: </span> }
-        <div className="playerName" contentEditable={true}
+        <div className={styles.playerName} contentEditable={true}
           onBlur={e => setPlayerName(e.currentTarget.textContent ?? "")}></div>
         <button onClick={draw}>Draw</button>
       </div>
 
-      <div className="bingo" style={{
+      <div className={styles.bingo} style={{
         gridTemplateColumns: `repeat(${dimension}, minmax(50px, 100px))`,
         gridTemplateRows: `repeat(${dimension}, 1fr)`
       }}>
@@ -194,9 +194,9 @@ const App = ({ dimension }: { dimension: number }) => {
           <div
             key={squareData.value}
             className={classNames(
-              "square", {
-                drawn: squareData.drawn,
-                inBingo: squareData.inBingo
+              styles.square, {
+                [styles.drawn]: squareData.drawn,
+                [styles.inBingo]: squareData.inBingo
               }
             )}>
             <span>{squareData.value}</span>
@@ -204,7 +204,7 @@ const App = ({ dimension }: { dimension: number }) => {
         )}
       </div>
 
-      <button className="playAgain" onClick={resetGame}>Reset and play again</button>
+      <button className={styles.playAgain} onClick={resetGame}>Reset and play again</button>
     
     </div>
   );
