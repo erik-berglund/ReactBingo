@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
 import './App.scss';
 
@@ -57,6 +57,8 @@ const App = ({ dimension }: { dimension: number }) => {
   const [squares, setSquares] = useState<SquaresMap>(() => buildSquaresMap(dimension));
   const [drawHistory, setDrawHistory] = useState(new Set<number>());
 
+  const allNumbers = useMemo(() => Array.from({length: dimension * dimension * 3}, (_, i) => i + 1), [dimension]);
+
   const resetGame = () => {
     setSquares(buildSquaresMap(dimension));
     setDrawHistory(new Set());
@@ -64,11 +66,7 @@ const App = ({ dimension }: { dimension: number }) => {
 
   const draw = () => {
     // Get available squares
-    // Could be stored in state, alternatively the array of possible numbers could be there.
-    // Alternative solution eg. to loop 
-    const availableRange = Array
-      .from({length: dimension * dimension * 3}, (_, i) => i + 1)
-      .filter(entry => !drawHistory.has(entry));
+    const availableRange = allNumbers.filter(entry => !drawHistory.has(entry));
 
     if (!availableRange.length) {
       return;
