@@ -1,6 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { enableMapSet } from 'immer';
+import { useImmerReducer } from 'use-immer';
 import classNames from 'classnames';
 import './App.scss';
+
+// Immer requires this for Map, Set
+enableMapSet();
 
 type Square = {
   value: number,
@@ -11,6 +16,31 @@ type Square = {
 }
 
 type SquaresMap = Map<number, Square>;
+
+type ACTIONTYPE =
+  | { type: "flagDrawn"; square: number }
+  | { type: "flagInBingo"; square: number }
+  | { type: "replace"; newMap: SquaresMap }
+  | { type: "reset"; dimension: number };
+
+const squaresReducer = (draft: SquaresMap, action: ACTIONTYPE) => {  
+  let currentSquare: Square | undefined;
+  
+  switch (action.type) {
+    case "flagDrawn":
+      currentSquare = draft.get(action.square);
+      return !currentSquare ? draft : draft.set(action.square, {...currentSquare, drawn: true});
+    case "flagInBingo":
+      currentSquare = draft.get(action.square);
+      return !currentSquare ? draft : draft.set(action.square, {...currentSquare, inBingo: true});
+    case "replace":
+      return action.newMap;
+    case "reset":
+      return buildSquaresMap(action.dimension);
+    default:
+      throw new Error();
+  }
+}
 
 const buildSquaresMap = (dimension: number) => {
   const returnMap: SquaresMap = new Map();
@@ -54,13 +84,13 @@ const buildSquaresMap = (dimension: number) => {
 const App = ({ dimension }: { dimension: number }) => {
 
   const [playerName, setPlayerName] = useState("");
-  const [squares, setSquares] = useState<SquaresMap>(() => buildSquaresMap(dimension));
+  const [squares, dispatch] = useImmerReducer(squaresReducer, new Map(), () => buildSquaresMap(dimension));
   const [drawHistory, setDrawHistory] = useState(new Set<number>());
 
   const allNumbers = useMemo(() => Array.from({length: dimension * dimension * 3}, (_, i) => i + 1), [dimension]);
 
   const resetGame = () => {
-    setSquares(buildSquaresMap(dimension));
+    dispatch({ type: "reset", dimension });
     setDrawHistory(new Set());
   }
 
@@ -93,7 +123,7 @@ const App = ({ dimension }: { dimension: number }) => {
       tmpSquares.set(randomSquare.value, {...randomSquare, drawn: true});
       tmpSquares = checkForBingo(tmpSquares);
 
-      setSquares(tmpSquares);
+      dispatch({ type: "replace", newMap: tmpSquares });
     }
   }
 
@@ -106,7 +136,7 @@ const App = ({ dimension }: { dimension: number }) => {
       [ allSquaresArray.filter(squareData => (squareData.drawn && squareData.row == i)),
         allSquaresArray.filter(squareData => (squareData.drawn && squareData.col == i))
       ].forEach(squaresToCheck => {
-        accumulatorSquares = checkAndUpdateBingoState(
+        accumulatorSquares = checkAndFlagBingo(
           accumulatorSquares, squaresToCheck
         );
       });
@@ -117,7 +147,7 @@ const App = ({ dimension }: { dimension: number }) => {
     [ allSquaresArray.filter(squareData => (squareData.drawn && squareData.row == squareData.col)),
       allSquaresArray.filter(squareData => (squareData.drawn && squareData.row + squareData.col == dimension - 1))
     ].forEach(squaresToCheck => {
-      accumulatorSquares = checkAndUpdateBingoState(
+      accumulatorSquares = checkAndFlagBingo(
         accumulatorSquares, squaresToCheck
       );
     });
@@ -125,7 +155,7 @@ const App = ({ dimension }: { dimension: number }) => {
     return accumulatorSquares;
   }
 
-  const checkAndUpdateBingoState = (accumulator: SquaresMap, squaresToCheck: Square[]) => {
+  const checkAndFlagBingo = (accumulator: SquaresMap, squaresToCheck: Square[]) => {
     if (squaresToCheck.length >= dimension) { // Should never be >, but you never know :)
       squaresToCheck.forEach(squareData => {
         accumulator.set(squareData.value, {...squareData, inBingo: true});
