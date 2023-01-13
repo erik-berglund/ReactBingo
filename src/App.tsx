@@ -18,14 +18,16 @@ type AppProps = {
 
 type AppState = {
   playerName: string | null, // We're not storing this right now...
-  squares: SquaresMap
+  squares: SquaresMap,
+  drawHistory: Set<number>
 }
 
 class App extends React.Component<AppProps, AppState> {
 
   state: AppState = {
     playerName: "",
-    squares: this.buildSquaresMap(this.props.dimension)
+    squares: this.buildSquaresMap(this.props.dimension),
+    drawHistory: new Set()
   };
 
   buildSquaresMap(dimension: number): SquaresMap {
@@ -67,33 +69,55 @@ class App extends React.Component<AppProps, AppState> {
     return returnMap;
   }
 
-  resetSquares() {
+  resetGame() {
     this.setState({
-      squares: this.buildSquaresMap(this.props.dimension)
+      squares: this.buildSquaresMap(this.props.dimension),
+      drawHistory: new Set()
     });
   }
 
   draw(): void {
     // Get available squares
-    const available = Array.from(this.state.squares.values()).filter(squareData => !squareData.drawn);
-    
-    if (!available.length) {
+    // Could be stored in state, alternatively the array of possible numbers could be there.
+    // Alternative solution eg. to loop 
+    const availableRange = Array
+      .from({length: this.props.dimension * this.props.dimension * 3}, (_, i) => i + 1)
+      .filter(entry => !this.state.drawHistory.has(entry));
+
+    console.debug(availableRange);
+
+    if (!availableRange.length) {
       return;
     }
-   
-    // Randomly pick one
-    const randomIndexWithinAvailableRange = Math.floor(Math.random() * available.length); // Exclusive
-    const randomSquare = available[randomIndexWithinAvailableRange];
-    
-    // Copy state
-    const tmpSquares: SquaresMap = new Map(this.state.squares);
-    
-    // Mark random square drawn
-    tmpSquares.set(randomSquare.value, {...randomSquare, drawn: true});
 
+    // Randomly pick one
+    const randomNumberWithinAvailableRange = availableRange[Math.floor(Math.random() * availableRange.length)];
+    
+    console.debug(randomNumberWithinAvailableRange);
+
+    // Copy drawHistory state
+    const tmpDrawHistory: Set<number> = new Set(this.state.drawHistory);
+    tmpDrawHistory.add(randomNumberWithinAvailableRange);
+    
     this.setState({
-      squares: tmpSquares
-    }, this.checkForBingo);
+      drawHistory: tmpDrawHistory
+    });
+
+
+    // Try to see if this square is on our board
+    const randomSquare = this.state.squares.get(randomNumberWithinAvailableRange);
+
+    if (randomSquare) {
+      // Copy squares state
+      const tmpSquares: SquaresMap = new Map(this.state.squares);
+    
+      // Mark random square drawn
+      tmpSquares.set(randomSquare.value, {...randomSquare, drawn: true});
+
+      this.setState({
+        squares: tmpSquares
+      }, this.checkForBingo);
+    }
   }
 
   checkForBingo(): void {
@@ -143,6 +167,17 @@ class App extends React.Component<AppProps, AppState> {
   render() {
     return (
       <div className="App">
+
+        <div className="drawnNumbersContainer">
+          { Array.from(this.state.drawHistory).map(square => (
+            <span
+              key={square}
+              className={classNames({
+                "found": this.state.squares.has(square)
+              })}
+            >{square}</span>  
+          ))}
+        </div>
         
         <div className="playerNameContainer">
           Your name: <div className="playerName" contentEditable="true"></div>
@@ -167,7 +202,7 @@ class App extends React.Component<AppProps, AppState> {
           )}
         </div>
 
-        <button className="playAgain" onClick={() => this.resetSquares()}>Reset and play again</button>
+        <button className="playAgain" onClick={() => this.resetGame()}>Reset and play again</button>
       
       </div>
     );
