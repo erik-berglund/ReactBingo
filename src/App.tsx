@@ -82,7 +82,7 @@ class App extends React.Component<AppProps, AppState> {
     }
    
     // Randomly pick one
-    const randomIndexWithinAvailableRange: number = Math.floor(Math.random() * available.length); // Exclusive
+    const randomIndexWithinAvailableRange = Math.floor(Math.random() * available.length); // Exclusive
     const randomSquare = available[randomIndexWithinAvailableRange];
     
     // Copy state
