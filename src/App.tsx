@@ -180,10 +180,12 @@ class App extends React.Component<AppProps, AppState> {
         </div>
         
         <div className="playerNameContainer">
-          Your name: <div className="playerName" contentEditable="true"></div>
+          { !this.state.playerName && <span>Your name: </span> }
+          <div className="playerName" contentEditable={true}
+            onBlur={e => this.setState({ playerName: e.currentTarget.textContent })}></div>
           <button onClick={() => this.draw()}>Draw</button>
         </div>
-        
+
         <div className="bingo" style={{
           gridTemplateColumns: `repeat(${this.props.dimension}, minmax(50px, 100px))`,
           gridTemplateRows: `repeat(${this.props.dimension}, 1fr)`
